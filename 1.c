@@ -8,20 +8,24 @@ typedef struct {
     char bookedBy[50];
 } Seat;
 
-Seat seats[20];
+Seat seats[20]; // Array to store seat availability (20 seats)
 int totalSeats = 20;
 
+// Global variable to track login state
+int loggedIn = 0; // 0 = Not logged in, 1 = Logged in
+char currentUser[50]; // To store the currently logged-in user's username
+
+// Function Prototypes
 void registration();
 int login();
 void viewSeats();
-void bookTicket(char username[]);
-void payment(char username[], int seatNumber);
-void displayBookingDetails(char username[]);
+void bookTicket();
+void payment();
+void displayBookingDetails();
 void exitProgram();
 
 int main() {
     int choice;
-    char username[50];
 
     printf("Welcome to the Bus Ticket Reservation System!\n");
 
@@ -36,7 +40,8 @@ int main() {
                 break;
             case 2:
                 if (login()) {
-                    printf("Login successful!\n");
+                    loggedIn = 1; // Set login status to true
+                    printf("Login successful! Welcome, %s\n", currentUser);
                 } else {
                     printf("Invalid username or password.\n");
                 }
@@ -45,22 +50,25 @@ int main() {
                 viewSeats();
                 break;
             case 4:
-                printf("Enter your username: ");
-                scanf("%s", username);
-                bookTicket(username);
+                if (!loggedIn) {
+                    printf("You must log in first to book a ticket.\n");
+                } else {
+                    bookTicket();
+                }
                 break;
             case 5:
-                printf("Enter your username: ");
-                scanf("%s", username);
-                int seatNumber;
-                printf("Enter seat number: ");
-                scanf("%d", &seatNumber);
-                payment(username, seatNumber);
+                if (!loggedIn) {
+                    printf("You must log in first to make a payment.\n");
+                } else {
+                    payment();
+                }
                 break;
             case 6:
-                printf("Enter your username: ");
-                scanf("%s", username);
-                displayBookingDetails(username);
+                if (!loggedIn) {
+                    printf("You must log in first to view booking details.\n");
+                } else {
+                    displayBookingDetails();
+                }
                 break;
             case 7:
                 exitProgram();
@@ -70,6 +78,8 @@ int main() {
         }
     }
 }
+
+// Function Definitions
 
 void registration() {
     FILE *fp;
@@ -82,11 +92,13 @@ void registration() {
 
     fp = fopen("users.txt", "a");
     if (fp == NULL) {
+        printf("Error opening file.\n");
         return;
     }
 
     fprintf(fp, "%s %s\n", username, password);
     fclose(fp);
+
     printf("Registration successful!\n");
 }
 
@@ -108,6 +120,7 @@ int login() {
     while (fscanf(fp, "%s %s", fileUser, filePass) != EOF) {
         if (strcmp(username, fileUser) == 0 && strcmp(password, filePass) == 0) {
             fclose(fp);
+            strcpy(currentUser, username); // Store the logged-in user's name
             return 1;
         }
     }
@@ -117,6 +130,7 @@ int login() {
 }
 
 void viewSeats() {
+    printf("Available seats:\n");
     for (int i = 1; i <= totalSeats; i++) {
         if (!seats[i - 1].isBooked) {
             printf("Seat %d is available\n", i);
@@ -126,9 +140,8 @@ void viewSeats() {
     }
 }
 
-void bookTicket(char username[]) {
+void bookTicket() {
     int seatNumber;
-    FILE *fp;
 
     printf("Enter seat number to book (1-%d): ", totalSeats);
     scanf("%d", &seatNumber);
@@ -137,50 +150,26 @@ void bookTicket(char username[]) {
         printf("Invalid seat number.\n");
         return;
     }
-
     if (seats[seatNumber - 1].isBooked) {
         printf("Seat is already booked.\n");
     } else {
         seats[seatNumber - 1].isBooked = 1;
-        strcpy(seats[seatNumber - 1].bookedBy, username);
-
-        fp = fopen("bookings.txt", "a");
-        if (fp == NULL) {
-            return;
-        }
-
-        fprintf(fp, "Seat %d booked by %s\n", seatNumber, username);
-        fclose(fp);
-
-        printf("Seat %d booked successfully!\n", seatNumber);
+        strcpy(seats[seatNumber - 1].bookedBy, currentUser);
+        printf("Seat %d booked successfully by %s!\n", seatNumber, currentUser);
     }
 }
 
-void payment(char username[], int seatNumber) {
-    FILE *fp;
-
-    if (seatNumber < 1 || seatNumber > totalSeats || !seats[seatNumber - 1].isBooked || strcmp(seats[seatNumber - 1].bookedBy, username) != 0) {
-        printf("Invalid seat or booking details.\n");
-        return;
-    }
-
-    fp = fopen("payments.txt", "a");
-    if (fp == NULL) {
-        printf("Error processing payment.\n");
-        return;
-    }
-
-    fprintf(fp, "User: %s | Seat: %d | Status: Paid\n", username, seatNumber);
-    fclose(fp);
-
-    printf("Payment successful for Seat %d by %s!\n", seatNumber, username);
+void payment() {
+    printf("Processing payment...\n");
+    printf("Payment successful!\n");
 }
 
-void displayBookingDetails(char username[]) {
+void displayBookingDetails() {
+    printf("Booking details for %s:\n", currentUser);
+
     int found = 0;
-
     for (int i = 0; i < totalSeats; i++) {
-        if (seats[i].isBooked && strcmp(seats[i].bookedBy, username) == 0) {
+        if (seats[i].isBooked && strcmp(seats[i].bookedBy, currentUser) == 0) {
             printf("Seat %d\n", i + 1);
             found = 1;
         }

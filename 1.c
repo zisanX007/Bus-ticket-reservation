@@ -23,6 +23,13 @@ void bookTicket();
 void payment();
 void displayBookingDetails();
 void exitProgram();
+void clearScreen() {
+#ifdef _WIN32
+    system("cls"); // For Windows
+
+#endif
+}
+
 
 int main() {
     int choice;
@@ -30,53 +37,59 @@ int main() {
     printf("Welcome to the Bus Ticket Reservation System!\n");
 
     while (1) {
-        printf("\n1. Register\n2. Login\n3. View Available Seats\n4. Book Ticket\n5. Payment\n6. Display Booking Details\n7. Exit\n");
-        printf("Choose an option: ");
-        scanf("%d", &choice);
+    clearScreen(); // Clear the console
+    printf("Welcome to the Bus Ticket Reservation System!\n");
+    printf("\n1. Register\n2. Login\n3. View Available Seats\n4. Book Ticket\n5. Payment\n6. Display Booking Details\n7. Exit\n");
+    printf("Choose an option: ");
+    scanf("%d", &choice);
 
-        switch (choice) {
-            case 1:
-                registration();
-                break;
-            case 2:
-                if (login()) {
-                    loggedIn = 1; // Set login status to true
-                    printf("Login successful! Welcome, %s\n", currentUser);
-                } else {
-                    printf("Invalid username or password.\n");
-                }
-                break;
-            case 3:
-                viewSeats();
-                break;
-            case 4:
-                if (!loggedIn) {
-                    printf("You must log in first to book a ticket.\n");
-                } else {
-                    bookTicket();
-                }
-                break;
-            case 5:
-                if (!loggedIn) {
-                    printf("You must log in first to make a payment.\n");
-                } else {
-                    payment();
-                }
-                break;
-            case 6:
-                if (!loggedIn) {
-                    printf("You must log in first to view booking details.\n");
-                } else {
-                    displayBookingDetails();
-                }
-                break;
-            case 7:
-                exitProgram();
-                return 0;
-            default:
-                printf("Invalid option. Try again.\n");
-        }
+    switch (choice) {
+        case 1:
+            registration();
+            break;
+        case 2:
+            if (login()) {
+                loggedIn = 1;
+                printf("Login successful! Welcome, %s\n", currentUser);
+            } else {
+                printf("Invalid username or password.\n");
+            }
+            break;
+        case 3:
+            viewSeats();
+            break;
+        case 4:
+            if (!loggedIn) {
+                printf("You must log in first to book a ticket.\n");
+            } else {
+                bookTicket();
+            }
+            break;
+        case 5:
+            if (!loggedIn) {
+                printf("You must log in first to make a payment.\n");
+            } else {
+                payment();
+            }
+            break;
+        case 6:
+            if (!loggedIn) {
+                printf("You must log in first to view booking details.\n");
+            } else {
+                displayBookingDetails();
+            }
+            break;
+        case 7:
+            exitProgram();
+            return 0;
+        default:
+            printf("Invalid option. Try again.\n");
     }
+
+    printf("\nPress Enter to continue...");
+    getchar(); getchar(); // Pause and wait for user input
+}
+
 }
 
 // Function Definitions
@@ -150,6 +163,7 @@ void bookTicket() {
         printf("Invalid seat number.\n");
         return;
     }
+
     if (seats[seatNumber - 1].isBooked) {
         printf("Seat is already booked.\n");
     } else {
@@ -183,4 +197,5 @@ void displayBookingDetails() {
 void exitProgram() {
     printf("Thank you for using the Bus Ticket Reservation System. Goodbye!\n");
 }
+
 
